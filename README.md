@@ -39,43 +39,44 @@ Installer Micropython (Obtenir un environnement de développement et flasher la 
 	8-Pour arrêter l'exécution du programme, s'assurer que rien n'est sélectionné puis faire Ctrl+C.
 
 Procédure pour le premier paramétrage
-	Installer l'application Serial Bluetooth Terminal sur un smartphone.
-	Démarrer le programme sur l'ESP.
-	Démarrer l'appli Serial Bluetooth Terminal.
-		Activer le bluetooth et la localisation du smartphone.
-		Appuyer sur le bouton menu, puis cliquer sur Devices.
-		En haut, cliquer sur SCAN.
-		L'ESP devrait apparaître sous son nom par défaut "ESP32".
-		Cliquer dessus.
-		Connected devrait apparaître en jaune dans le terminal.
-		Activer le DEBUG pour pouvoir suivre la bonne exécution des commandes (depuis widows) :
-			Envoyer la commande s_debug=1;
-				A chaque commande reçue et interprétée par l'ESP, le message OK doit apparaître en vert dans le terminal.
-			Envoyer la commande save;
-			Envoyer la commande restart;
-				Attendre une dizaine de secondes.
-		Un message "Connection lost" devrait apparaître.
-		Se reconnecter à l'ESP (via le bouton en haut à droite).
-		Affecter une IP à l'ESP :
-			Choisir une IP compatible avec le réseau :
-				Depuis Windows, ouvrir une invite de commande et taper la commande ipconfig.
-					Identifier le réseau local et retenir l'IP du pc (sous la forme 192.168.1.xxx ou 192.168.0.xxx)
-				Choisir une ip similaire à celle du PC (mon IP est 192.168.1.21, dans l'exemple qui suivra, je vais choisir 192.168.1.152)
-			Envoyer la commande s_ip=192.168.1.152
-		Configurer le nom du point d'accès WIFI (par exemple SFR_42) :
-			Envoyer la commande s_ssid=SFR_42;
-		Configurer le mot de passe d'accès au WIFI (par exemple 12345678) :
-			Envoyer la commande s_pass=12345678;
-		Enregistrer
-			Envoyer la commande save;
-		Redémarrer l'ESP :
-			Envoyer la commande restart;
-		L'ESP devrait afficher les messages suivants dans la console série:
-			WIFI : Connected
-			Main : Starting WebServer
-			WebServer : Started
-		Ensuite, ouvrir un navigateur web et saisir l'adresse ip choisie.
-		La liste des commandes y est affichée. Il est possible de les tester. Un message de retour apparaîtra en dessous après exécution de la commande.
+
+	- Installer l'application Serial Bluetooth Terminal sur un smartphone.
+	- Démarrer le programme sur l'ESP.
+	- Démarrer l'appli Serial Bluetooth Terminal.
+		- Activer le bluetooth et la localisation du smartphone.
+		- Appuyer sur le bouton menu, puis cliquer sur Devices.
+		- En haut, cliquer sur SCAN.
+		- L'ESP devrait apparaître sous son nom par défaut "ESP32".
+		- Cliquer dessus.
+		- Connected devrait apparaître en jaune dans le terminal.
+		- Activer le DEBUG pour pouvoir suivre la bonne exécution des commandes (depuis widows) :
+			- Envoyer la commande s_debug=1;
+				 -A chaque commande reçue et interprétée par l'ESP, le message OK doit apparaître en vert dans le terminal.
+			- Envoyer la commande save;
+			- Envoyer la commande restart;
+				- Attendre une dizaine de secondes.
+		- Un message "Connection lost" devrait apparaître.
+		- Se reconnecter à l'ESP (via le bouton en haut à droite).
+		- Affecter une IP à l'ESP :
+			- Choisir une IP compatible avec le réseau :
+				- Depuis Windows, ouvrir une invite de commande et taper la commande ipconfig.
+					- Identifier le réseau local et retenir l'IP du pc (sous la forme 192.168.1.xxx ou 192.168.0.xxx)
+				- Choisir une ip similaire à celle du PC (mon IP est 192.168.1.21, dans l'exemple qui suivra, je vais choisir 192.168.1.152)
+			- Envoyer la commande s_ip=192.168.1.152
+		- Configurer le nom du point d'accès WIFI (par exemple SFR_42) :
+			- Envoyer la commande s_ssid=SFR_42;
+		- Configurer le mot de passe d'accès au WIFI (par exemple 12345678) :
+			- Envoyer la commande s_pass=12345678;
+		- Enregistrer
+			- Envoyer la commande save;
+		- Redémarrer l'ESP :
+			- Envoyer la commande restart;
+		- L'ESP devrait afficher les messages suivants dans la console série:
+			- WIFI : Connected
+			- Main : Starting WebServer
+			- WebServer : Started
+		- Ensuite, ouvrir un navigateur web et saisir l'adresse ip choisie.
+		- La liste des commandes y est affichée. Il est possible de les tester. Un message de retour apparaîtra en dessous après exécution de la commande.
 		
 		Les commandes web sont exécutables via des requêtes get dont l'url est l'identifiant de la commande. 
 		Il ne peut y avoir qu'une valeur du paramètre GET. Cette valeur est séparée du nom du paramètre par un signe "=".
