@@ -31,6 +31,7 @@ class Program:
                                self.stopWebServer)
         self.webServer = WebServer(80, self.cmdsWeb, self.cmdsBle)
         self.startNetwork()
+        print(str(config.getValue(config._pin_button_toggle_on_off)))
         self.buttonOnOff = Button(config.getValue(config._pin_button_toggle_on_off), self.btn_pressed)
         
     def createCmds(self,prefix = ""):
@@ -54,12 +55,21 @@ class Program:
         cmds.add(prefix+"g_config", "get current config", self.getCurrentConfig)
         cmds.add(prefix+"s_debug", "set debug flag", self.setDebug)
         cmds.add(prefix+"load_config", "reload config from current file", self.loadConfig)
+        cmds.add(prefix+"help", "get all available commands", self.getAllCommands)
+        cmds.sort()
         return cmds
 
     def getAllCommands(self):
         s = ""
-        for cmd in self.cmdsBle:
-            s += cmd.identifier + ' : ' + cmd.description
+        try:
+            i = 2
+            for key in self.cmdsBle.commands.keys():
+                s += self.cmdsBle.commands[key].identifier + ' : ' + self.cmdsBle.commands[key].description
+                if (i < len(self.cmdsBle.commands)):
+                    s+="\n"
+                i += 1
+        except Exception as e:
+            utils.trace("Main : Error, " + str(e))
         return s
     def btn_pressed(self):
         if self.pin.getValue():

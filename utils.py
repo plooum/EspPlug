@@ -57,8 +57,10 @@ class Commands:
     
     def add(self,identifier, description, target):
         self.commands[identifier] = Command(identifier, description, target)
-        self.commands=collections.OrderedDict(sorted(self.commands.items()))
+        
     def execute(self,identifier, arg = None):
         if identifier in commands.keys():
             if self.commands[identifier].target is not None:
                 self.commands[identifier].execute(arg)
+    def sort(self):
+        self.commands=collections.OrderedDict(sorted(self.commands.items()))

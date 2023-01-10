@@ -2,6 +2,7 @@ import bluetooth
 from micropython import const
 import utils
 import config
+import time
 
 _IRQ_CENTRAL_CONNECT = const(1)
 _IRQ_CENTRAL_DISCONNECT = const(2)
@@ -95,15 +96,13 @@ class Ble():
                             except:
                                 error = True
                         if res is not None:
-                            self.ble.gatts_write(self.tx, str(res) + "\r\n")
-                            self.ble.gatts_notify(self.conn_handle, self.tx)
+                            self.send(res)   
+                            res = ""
                         else:
                             if error:
-                                self.ble.gatts_write(self.tx, "ERROR")
-                                self.ble.gatts_notify(self.conn_handle, self.tx)
+                                self.send("ERROR")
                             else:
-                                self.ble.gatts_write(self.tx, "OK")
-                                self.ble.gatts_notify(self.conn_handle, self.tx)
+                                self.send("OK")
             self.msg = spl[len(spl)-1]
     def register(self):
         # Nordic UART Service (NUS)
@@ -122,8 +121,17 @@ class Ble():
 #         SERVICES = (BLE_UART, HR_SERVICE)
 #         ((self.tx, self.rx,), (self.hr,), ) = self.ble.gatts_register_services(SERVICES)
 
-#     def send(self, data):
-#         self.ble.gatts_notify(0, self.tx, data + '\n')
+    def send(self, data):
+        for line in str(data).split("\n"):
+            redo = True
+            while redo:
+                try:
+                    self.ble.gatts_write(self.tx, str(line) + "\n")
+                    self.ble.gatts_notify(self.conn_handle, self.tx )
+                    redo = False
+                except:
+                    redo = True
+                    time.sleep(0.1)
 
     def startAdvertise(self):
         name = bytes(self.name, 'UTF-8')

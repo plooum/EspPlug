@@ -6,7 +6,7 @@ class Button:
     def __init__(self, pinNumber, callbackOnPressed):
         self.pinNumber = pinNumber 
         self.callbackOnPressed = callbackOnPressed
-        self.pin = Pin(27,Pin.IN, Pin.PULL_UP)
+        self.pin = Pin(self.pinNumber, Pin.IN, Pin.PULL_UP)
         self.pin.irq(trigger = Pin.IRQ_FALLING, handler = self.btn_pressed)
         self.lastExec = 0
 

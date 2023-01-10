@@ -5,6 +5,7 @@ import collections
 config_keys = []
 
 file_config_name = "config.json"
+_meta_conf_key = "name"
 
 config_tab = {}
 
@@ -34,6 +35,7 @@ config_keys.append(_cmd_ble_end_char)
 config_keys.append(_debug)
 config_keys.append(_pin_button_toggle_on_off)
 config_keys.sort()
+
 def loadDefaultValues():
     global config_tab
     if(not(_pinout_num in config_tab.keys()) or str(config_tab[_pinout_num]) == ""):
@@ -51,20 +53,21 @@ def loadDefaultValues():
     for key in config_keys:
         if(not(key in config_tab.keys())):
             config_tab[key] = ""
-
+    sort()
+    
 def readMetaConf():
     global file_config_name
     try:
         meta_config_tab = {}
         f = open("meta_config.json", 'r')
         meta_config_tab = json.loads(f.read())
-        file_config_name = "config" + str(meta_config_tab["config_num"]) + ".json"
+        file_config_name = "config" + str(meta_config_tab[_meta_conf_key]) + ".json"
     except Exception as e:
         print (str(e))
 
 def setMetaConf(numConf):
     meta_config_tab = {}
-    meta_config_tab["config_num"] = str(numConf)
+    meta_config_tab[_meta_conf_key] = str(numConf)
     f = open("meta_config.json", 'w')
     f.write(json.dumps(meta_config_tab))
     f.close()
@@ -94,7 +97,7 @@ def writeFile():
         utils.trace("Config : Error, " + str(e))
         raise
 
-def orderTab():
+def sort():
     global config_tab
     try:
         config_tab=collections.OrderedDict(sorted(config_tab.items()))
