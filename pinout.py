@@ -1,5 +1,5 @@
 from machine import Pin
-
+ 
 class PinOut:
     def __init__(self, num):
         self.pinOut = Pin(num, Pin.OUT)

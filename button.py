@@ -1,7 +1,7 @@
 from machine import Pin
 import time
 import utils 
-
+ 
 class Button:
     def __init__(self, pinNumber, callbackOnPressed):
         self.pinNumber = pinNumber 
