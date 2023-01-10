@@ -1,6 +1,8 @@
 # EspPlug
 MicroPython project to inject into an Esp board to control an output over WiFi and BLE.
 
+Testé sur un ESP32. Pas encore testé sur un ESP8266
+
 Ce projet a pour but de mettre à disposition des interfaces de contrôle d'un ESP32 : 
 	- un bouton poussoir
 	- des commandes via le bluetooth BLE : protocol Nordic UART Service (NUS)
