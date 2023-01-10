@@ -78,10 +78,10 @@ Procédure pour le premier paramétrage
 		- Ensuite, ouvrir un navigateur web et saisir l'adresse ip choisie.
 		- La liste des commandes y est affichée. Il est possible de les tester. Un message de retour apparaîtra en dessous après exécution de la commande.
 		
-		Les commandes web sont exécutables via des requêtes get dont l'url est l'identifiant de la commande. 
-		Il ne peut y avoir qu'une valeur du paramètre GET. Cette valeur est séparée du nom du paramètre par un signe "=".
-		Ce signe est paramétrable. Ce paramètre s'appelle "cmd_separator" dans la configuration.
-			exemple de requête pour allumer la sortie (script JS) : 
+		- Les commandes web sont exécutables via des requêtes get dont l'url est l'identifiant de la commande. 
+		- Il ne peut y avoir qu'une valeur du paramètre GET. Cette valeur est séparée du nom du paramètre par un signe "=".
+		- Ce signe est paramétrable. Ce paramètre s'appelle "cmd_separator" dans la configuration.
+			- exemple de requête pour allumer la sortie (script JS) : 
 				var xhr = new XMLHttpRequest();
                 xhr.open("GET", "192.168.1.152/?s_on", true);
                 xhr.onload = function(e) {
@@ -89,7 +89,7 @@ Procédure pour le premier paramétrage
 					// s devrait contenir "OK" ici
                 }
                 xhr.send();
-			exemple de requête pour changer le nom Bluetooth de l'ESP (script JS) : 
+			- exemple de requête pour changer le nom Bluetooth de l'ESP (script JS) : 
 				var xhr = new XMLHttpRequest();
                 xhr.open("GET", "192.168.1.152//?s_ble=ESP_lumiere_salon", true);
                 xhr.onload = function(e) {
@@ -97,7 +97,7 @@ Procédure pour le premier paramétrage
 					// s devrait contenir "OK" ici
                 }
                 xhr.send();
-			exemple de requête pour récupérer la configuration (script JS) : 
+			- exemple de requête pour récupérer la configuration (script JS) : 
 				var xhr = new XMLHttpRequest();
                 xhr.open("GET", "192.168.1.152///?g_config", true);
                 xhr.onload = function(e) {
@@ -106,29 +106,29 @@ Procédure pour le premier paramétrage
                 }
                 xhr.send();
 -----------		
-Fonctionnalités disponibles
-	WIFI
-		Connexion à une box WIFI
-	Serveur WEB
-		Commandes via des requêtes GET
-		Liste de commandes disponibles affichées sur la page web de la racine (les commandes sont aussi valables pour le Bluetooth BLE)
-		Les commandes sont testables depuis l'interface web
-	IP Fixe
-	Config dans le fichier de config
-	Fichier de config interchangeable : possibilité de passer d'une config à une autre via des commandes
-	Bluetooth BLE
-		Possibilité de se connecter via l'appli Bluetooth Serial Terminal.
-		L'envoi de commande est possible
-		Envoyer des commandes pour modifier les paramètres de config.
-		Envoyer des commandes pour autre chose, cf. liste de commandes.
-	Bouton par "Interruption" cf. IRQ
-		Active/Désactive la sortie
+- Fonctionnalités disponibles
+	- WIFI
+		- Connexion à une box WIFI
+	- Serveur WEB
+		- Commandes via des requêtes GET
+		- Liste de commandes disponibles affichées sur la page web de la racine (les commandes sont aussi valables pour le Bluetooth BLE)
+		- Les commandes sont testables depuis l'interface web
+	- IP Fixe
+	- Config dans le fichier de config
+	- Fichier de config interchangeable : possibilité de passer d'une config à une autre via des commandes
+	- Bluetooth BLE
+		- Possibilité de se connecter via l'appli Bluetooth Serial Terminal.
+		- L'envoi de commande est possible
+		- Envoyer des commandes pour modifier les paramètres de config.
+		- Envoyer des commandes pour autre chose, cf. liste de commandes.
+	- Bouton par "Interruption" cf. IRQ
+		- Active/Désactive la sortie
 		
-Fonctionnalités à développer
-	WIFI
-		Faire office de "Box WIFI" pour permettre de se connecter lorsque les paramètres de connexion à la Box ne sont pas définis.
-		Pouvoir utiliser le DHCP et afficher son ip par exemple en BLE
+- Fonctionnalités à développer
+	- WIFI
+		- Faire office de "Box WIFI" pour permettre de se connecter lorsque les paramètres de connexion à la Box ne sont pas définis.
+		- Pouvoir utiliser le DHCP et afficher son ip par exemple en BLE
 	
-Remarques
-	Ne pas utiliser des threads pour des fonctionnalités qui fonctionnent en continu
-		=> Après plusieurs essais, j'en suis venu à la conclusion que les threads peuvent interrompre les foncionnalités qui ont besoin des IRQ (notamment le bluetooth)
+- Remarques
+	- Ne pas utiliser des threads pour des fonctionnalités qui fonctionnent en continu
+		- Après plusieurs essais, j'en suis venu à la conclusion que les threads peuvent interrompre les foncionnalités qui ont besoin des IRQ (notamment le bluetooth)
