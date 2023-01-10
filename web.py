@@ -2,7 +2,7 @@ import socket
 import utils
 import time
 import config
- 
+
 class WebServer:
     def __init__(self, port, commands, bleCmds):
         self.commands = commands

@@ -9,7 +9,7 @@ import time
 import machine
 import _thread
 from button import Button
- 
+
 def restartAsync():
     time.sleep(5)
     machine.reset()

@@ -1,7 +1,7 @@
 import utils
 import json
 import collections
- 
+
 config_keys = []
 
 file_config_name = "config.json"

@@ -2,7 +2,7 @@ from time import time,sleep
 import network
 import _thread
 import utils
- 
+
 class Network:
     def __init__(self,ssid, password, ip, mask, gw, dns, callbackConnected, callbackDisconnected):
         self._ssid = ssid
