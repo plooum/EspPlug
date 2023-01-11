@@ -14,7 +14,7 @@ class Button:
         curMs = time.ticks_ms()
         if curMs < self.lastExec:
             self.lastExec = 0
-        if curMs - self.lastExec > 1000:
+        if curMs - self.lastExec > 500:
             self.lastExec = curMs
             self.btn_pressed_filtered()
 
