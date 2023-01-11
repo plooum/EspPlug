@@ -62,7 +62,7 @@ class Program:
     def getAllCommands(self):
         s = ""
         try:
-            i = 2
+            i = 1
             for key in self.cmdsBle.commands.keys():
                 s += self.cmdsBle.commands[key].identifier + ' : ' + self.cmdsBle.commands[key].description
                 if (i < len(self.cmdsBle.commands)):
