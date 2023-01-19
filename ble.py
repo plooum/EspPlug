@@ -3,6 +3,7 @@ from micropython import const
 import utils
 import config
 import time
+from security import Security
 
 _IRQ_CENTRAL_CONNECT = const(1)
 _IRQ_CENTRAL_DISCONNECT = const(2)
@@ -35,6 +36,12 @@ _IRQ_GATTS_WRITE = const(3)
 #_IRQ_GET_SECRET = const(29)
 #_IRQ_SET_SECRET = const(30)
 
+WAITING_PASSWORD = 0
+PASSWORD_VERIFIED = 1
+BLOCKED = 2
+
+end_password_char = ';'
+
 class Ble():
     def __init__(self, name, commands):
         self.name = name
@@ -45,6 +52,8 @@ class Ble():
         self.startAdvertise()
         self.commands = commands
         self.msg = ""
+        self.state = WAITING_PASSWORD
+        self.input_password = ""
         
     def connected(self):
         utils.trace("BLE : Connected")
@@ -58,16 +67,37 @@ class Ble():
         if event == _IRQ_CENTRAL_CONNECT:
             self.connected()
             self.conn_handle, addr_type, addr = data
-        
+            self.state = WAITING_PASSWORD
+            self.input_password = ""
+            
         elif event == _IRQ_CENTRAL_DISCONNECT:
             self.disconnected()
-            conn_handle, addr_type, addr = data
+            self.conn_handle = None
         
         elif event == _IRQ_GATTS_WRITE:
             buffer = self.ble.gatts_read(self.rx)
             message = buffer.decode('UTF-8').strip()
             utils.trace("BLE : Message received, " + message)
-            self.handleCommand(message)
+            if (self.state == WAITING_PASSWORD):
+                self.input_password += message
+                if(len(self.input_password)>51):
+                    self.state = BLOCKED
+                if (end_password_char in self.input_password):
+                    buf= self.input_password.split(end_password_char)[0]
+                    security = Security()
+                    if security.check_password(buf):
+                        self.send("OK")
+                        self.state = PASSWORD_VERIFIED
+                    else:
+                        self.send("ERROR")
+                        self.state = BLOCKED
+                    self.input_password = ""
+            elif (self.state == PASSWORD_VERIFIED):
+                self.handleCommand(message)
+            elif (self.state == BLOCKED):
+                return
+            else: #par défaut : BLOCKED, on ne répond plus
+                return
         else:
             utils.trace("BLE : event reveived, " + str(event))
 

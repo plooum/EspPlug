@@ -9,6 +9,7 @@ import time
 import machine
 import _thread
 from button import Button
+from security import Security
 
 def restartAsync():
     time.sleep(5)
@@ -33,44 +34,53 @@ class Program:
         self.startNetwork()
         print(str(config.getValue(config._pin_button_toggle_on_off)))
         self.buttonOnOff = Button(config.getValue(config._pin_button_toggle_on_off), self.btn_pressed)
-        
+        s = Security()
+    '''
+    Ne pas mettre de ',' ni de ";" dans la description d'une commande.
+    Ces caractères sont réservés pour la commande help :
+        ',' : permet de séparer les champs "nom","description","nombre de paramètres".
+        ';' : permet de séparer les commandes.
+    '''
     def createCmds(self,prefix = ""):
         cmds = utils.Commands()
-        cmds.add(prefix+"s_ssid", "set wifi ssid", self.setWifiSsid)
-        cmds.add(prefix+"s_pass", "set wifi password", self.setWifiPassword)
-        cmds.add(prefix+"s_ip", "set wifi ip", self.setWifiIp)
-        cmds.add(prefix+"s_mask", "set wifi mask", self.setWifiMask)
-        cmds.add(prefix+"s_gw", "set wifi gw", self.setWifiGw)
-        cmds.add(prefix+"s_dns", "set wifi dns", self.setWifiDns)
-        cmds.add(prefix+"s_pin_num", "set pin out number", self.setPinOut)
-        cmds.add(prefix+"s_ble", "set bluetooth name", self.setPinBleName)
-        cmds.add(prefix+"s_sep", "set command argument separator", self.setCmdSep)
-        cmds.add(prefix+"s_endc", "set bluetooth command terminator character", self.setCmdEndChar)
+        cmds.add(prefix+"s_ssid", "set wifi ssid", self.setWifiSsid, True)
+        cmds.add(prefix+"s_pass", "set wifi password", self.setWifiPassword, True)
+        cmds.add(prefix+"s_ip", "set wifi ip", self.setWifiIp, True)
+        cmds.add(prefix+"s_mask", "set wifi mask", self.setWifiMask, True)
+        cmds.add(prefix+"s_gw", "set wifi gw", self.setWifiGw, True)
+        cmds.add(prefix+"s_dns", "set wifi dns", self.setWifiDns, True)
+        cmds.add(prefix+"s_pin_num", "set pin out number", self.setPinOut, True)
+        cmds.add(prefix+"s_blename", "set bluetooth name", self.setPinBleName, True)
+        cmds.add(prefix+"s_sep", "set command argument separator", self.setCmdSep, True)
+        cmds.add(prefix+"s_endc", "set bluetooth command terminator character", self.setCmdEndChar, True)
         cmds.add(prefix+"restart", "restart", self.restart)
         cmds.add(prefix+"save", "save config", self.saveConfig)
-        cmds.add(prefix+"s_meta", "use another config file", self.setConfFile)
+        cmds.add(prefix+"s_meta", "use another config file", self.setConfFile, True)
         cmds.add(prefix+"g_status", "get pin status", self.getPinStatus)
         cmds.add(prefix+"s_off", "set output off", self.pinOff)
         cmds.add(prefix+"s_on", "set output on", self.pinOn)
         cmds.add(prefix+"g_config", "get current config", self.getCurrentConfig)
-        cmds.add(prefix+"s_debug", "set debug flag", self.setDebug)
+        cmds.add(prefix+"s_debug", "set debug flag", self.setDebug, True)
         cmds.add(prefix+"load_config", "reload config from current file", self.loadConfig)
         cmds.add(prefix+"help", "get all available commands", self.getAllCommands)
+        cmds.add(prefix+"s_blepass", "set the bluetooth password", self.setBlePassword, True)
         cmds.sort()
         return cmds
 
+    def setBlePassword(self, newPassword):
+        s = Security()
+        if (not(s.change(newPassword))):
+            raise Exception("")
+        
     def getAllCommands(self):
         s = ""
         try:
-            i = 1
             for key in self.cmdsBle.commands.keys():
-                s += self.cmdsBle.commands[key].identifier + ' : ' + self.cmdsBle.commands[key].description
-                if (i < len(self.cmdsBle.commands)):
-                    s+="\n"
-                i += 1
+                s += self.cmdsBle.commands[key].identifier + ',' + self.cmdsBle.commands[key].description + ',' + ("1" if self.cmdsBle.commands[key].takeParameters else "0" ) + ";"
         except Exception as e:
             utils.trace("Main : Error, " + str(e))
         return s
+    
     def btn_pressed(self):
         if self.pin.getValue():
             self.pin.off()
