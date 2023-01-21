@@ -16,19 +16,21 @@ class UTILS:
 class CIPHER:
     @staticmethod
     def enc(msg):
-        ret = ""
-        i=0
-        while i < len(msg):
-            ret += chr(ord(msg[i])+10)
-            i+=1
+        ret=msg
+#         ret = ""
+#         i=0
+#         while i < len(msg):
+#             ret += chr(ord(msg[i])+10)
+#             i+=1
         return ret
     @staticmethod
     def dec(msg):
-        ret = ""
-        i=0
-        while i < len(msg):
-            ret += chr(ord(msg[i])-10)
-            i+=1
+        ret=msg
+#         ret = ""
+#         i=0
+#         while i < len(msg):
+#             ret += chr(ord(msg[i])-10)
+#             i+=1
         return ret
     
 def trace(msg):

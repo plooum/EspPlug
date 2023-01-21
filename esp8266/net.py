@@ -1,10 +1,11 @@
 from time import time,sleep
 import network
-import _thread
 import utils
+import config
 
 class Network:
-    def __init__(self,ssid, password, ip, mask, gw, dns, callbackConnected, callbackDisconnected):
+    def __init__(self,ssid, password, ip, mask, gw, dns, callbackConnected, callbackDisconnected, ip_fixe = False):
+        self._ip_fixe = ip_fixe
         self._ssid = ssid
         self._password = password
         self._ip = ip
@@ -21,9 +22,14 @@ class Network:
             ips = self._ip.split(".")
             if len(ips) > 2:
                 self._dns = ips[0] + '.' + ips[1] + '.' +ips[2] + '.1' 
-        self.wlan = network.WLAN(network.STA_IF)
+        if (config.getValue(config._mode_wifi) == 1):
+            self.wlan = network.WLAN(network.AP_IF)
+        else:
+            self.wlan = network.WLAN(network.STA_IF)
         self.lastConnectionAttempt = -10000
         self.nbSecondsBetweenAttempts = 600
+        if (config.getValue(config._mode_wifi) == 1):
+            self.nbSecondsBetweenAttempts = 5
         self.callbackConnected = callbackConnected
         self.callbackDisconnected = callbackDisconnected
         self.stop_ = False
@@ -34,15 +40,24 @@ class Network:
         if((time() - self.lastConnectionAttempt) > self.nbSecondsBetweenAttempts):
             self.lastConnectionAttempt = time()
             utils.trace("WIFI : Connecting")
-            self.wlan = network.WLAN(network.STA_IF)
-            self.wlan.ifconfig((self._ip, self._mask, self._gw, self._dns)) # IP fixe sinon supprimer la ligne
-            self.wlan.active(True)
-            self.wlan.connect(self._ssid, self._password)
+            if (config.getValue(config._mode_wifi) == 0):
+                self.wlan = network.WLAN(network.STA_IF)
+                if (self._ip_fixe):
+                    self.wlan.ifconfig((self._ip, self._mask, self._gw, self._dns)) # IP fixe sinon supprimer la ligne
+                self.wlan.active(True)
+                self.wlan.connect(self._ssid, self._password)
+            else:
+                self.wlan = network.WLAN(network.AP_IF)
+                self.wlan.active(True)
+                self.wlan.config(essid="sonoff", password="123456789")
     
     def isConnected(self):
         isConnected = False
         try:
-            isConnected = self.wlan.isconnected()
+            if (config.getValue(config._mode_wifi) == 0):
+                isConnected = self.wlan.isconnected()
+            else:
+                isConnected = self.wlan.active()
         except:
             pass
         return isConnected
@@ -60,14 +75,18 @@ class Network:
     def update(self):
         try:
             if(self.isRunning()):
-                if(not (self.wlan.isconnected())):
-                    self.connect()
+                if(not (self.isConnected())):
+                    try:
+                        self.connect()
+                    except Exception as e: 
+                        utils.trace("WIFI Connect Error : "+str(e))
                     maxWait = 4
                     lastTime = time()
                     while(not(self.isConnected()) and time()-lastTime < maxWait):
                         sleep(0.1)
                     if(self.isConnected()):
                         utils.trace("WIFI : Connected")
+                        utils.trace(str(self.wlan.ifconfig()))
                         if(self.callbackConnected() is not None):
                             self.callbackConnected()
                     else:

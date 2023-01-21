@@ -1,12 +1,9 @@
 # This file is executed on every boot (including wake-boot from deepsleep)
 #import esp
 #esp.osdebug(None)
-import uos, machine
+#import uos, machine
 #uos.dupterm(None, 1) # disable REPL on UART(0)
-import gc
+#import gc
 #import webrepl
 #webrepl.start()
-import main
-
-gc.collect()
-main.main()
+# gc.collect()

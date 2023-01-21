@@ -21,6 +21,7 @@ _cmd_separator = "cmd_separator"
 _cmd_ble_end_char = "cmd_ble_end_char"
 _debug = "debug"
 _pin_button_toggle_on_off = "pin_button_toggle_on_off"
+_mode_wifi = "mode_wifi"
 
 config_keys.append(_wifi_ssid)
 config_keys.append(_wifi_password)
@@ -34,6 +35,7 @@ config_keys.append(_cmd_separator)
 config_keys.append(_cmd_ble_end_char)
 config_keys.append(_debug)
 config_keys.append(_pin_button_toggle_on_off)
+config_keys.append(_mode_wifi)
 config_keys.sort()
 
 def loadDefaultValues():
@@ -50,6 +52,8 @@ def loadDefaultValues():
         config_tab[_debug] = True
     if(not(_pin_button_toggle_on_off in config_tab.keys()) or str(config_tab[_pin_button_toggle_on_off]) == ""):
         config_tab[_pin_button_toggle_on_off] = 0
+    if(not(_mode_wifi in config_tab.keys()) or str(config_tab[_mode_wifi]) == ""):
+        config_tab[_mode_wifi] = 1
     for key in config_keys:
         if(not(key in config_tab.keys())):
             config_tab[key] = ""

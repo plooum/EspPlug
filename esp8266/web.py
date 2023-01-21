@@ -78,13 +78,13 @@ class WebServer:
                             else:
                                 connectionCli.sendall("OK")
                     else:
-                        connectionCli.sendall(self.html()) 
+                        self.sendHtml(connectionCli) 
                     connectionCli.close()
             except Exception as e:
                 utils.trace("WebServer : Error, "+str(e))
-    
-    def html(self):
-        html = """
+                
+    def sendHtml(self, connectionCli):
+        connectionCli.sendall("""
 <!DOCTYPE html>
 <html>
     <head>
@@ -108,23 +108,17 @@ class WebServer:
         <h1>List of all available commands</h1>
         <h2>Commands Web</h2>
         <ul>
-"""
+""")
         i=0
         for key in self.commands.commands.keys():
-            html += "<li>"+self.commands.commands[key].identifier+"<br><button class=\"btn\" onclick=\"ajax('"+self.commands.commands[key].identifier + "', '"+str(i)+"')\">" + self.commands.commands[key].description+"</button>"
+            html = ""
+            html += "<li>"+self.commands.commands[key].identifier+"<br><button class=\"btn\" onclick=\"ajax('"+self.commands.commands[key].identifier + "', '"+str(i)+"')\">" + self.commands.commands[key].description+"</button></li>"
             html += '<input class="form-control" id="input'+str(i)+'" type="text">'
             html += '<div id="res'+str(i)+'"></div>'
+            connectionCli.sendall(html)
             i+=1
-        html +="""
-        </ul>
-        <h2>Commands Bluetooth</h2>
-        <ul>
-"""
-        for key in self.bleCmds.commands.keys():
-            html += "<li>"+self.bleCmds.commands[key].identifier + "<br>"+self.bleCmds.commands[key].description+"</li>"     
-        html += """
+        connectionCli.sendall("""
         </ul>
     </body>
 </html>
-"""
-        return html
+""")
