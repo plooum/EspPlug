@@ -47,14 +47,15 @@ class WebServer:
                     hasError = False
                     returnValue = None
                     for key in self.commands.commands.keys():
+                        _key = "/?" + key
                         try:
-                            if key in request:
+                            if _key in request:
                                 lines = request.split("\n")
                                 for line in lines:
-                                    if key in line:
+                                    if _key in line:
                                         words = line.split()
                                         for word in words:
-                                            if key in word:
+                                            if _key in word:
                                                 hasCmd = True
                                                 args = word.split(config.getValue(config._cmd_separator))
                                                 if len(args) > 1:
@@ -78,53 +79,67 @@ class WebServer:
                             else:
                                 connectionCli.sendall("OK")
                     else:
-                        connectionCli.sendall(self.html()) 
+                        self.sendHtml(connectionCli)
                     connectionCli.close()
             except Exception as e:
                 utils.trace("WebServer : Error, "+str(e))
     
-    def html(self):
-        html = """
+    def sendHtml(self, connectionCli):
+        connectionCli.sendall("""
 <!DOCTYPE html>
 <html>
     <head>
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM" crossorigin="anonymous"></script>
+        
         <script>
             function ajax(url, num){
                 var xhr = new XMLHttpRequest();
-                var arg = document.getElementById("input" + num).value
-                
+                var arg = "";
+                try{
+                    arg = document.getElementById("input" + num).value;
+                }catch{}
                 arg = arg?"""+'"' + config.getValue(config._cmd_separator) + '"'+"""+arg:"";
 
-                xhr.open("GET", url + arg, true);
+                xhr.open("GET", "/?" + url + arg, true);
                 xhr.onload = function(e) {
                     var s = xhr.responseText;
-                    document.getElementById("res"+num).innerText=s;
+                    var sa = s.replaceAll(String.fromCharCode(3),"</td></tr><td>");
+                    var sb = sa.replaceAll("|","</td><td>");
+                    document.getElementById("res"+num).innerHTML = "<table><tr><td>" + sb + "</table>";
                 }
                 xhr.send();
             }
         </script>
     </head>
     <body>
-        <h1>List of all available commands</h1>
-        <h2>Commands Web</h2>
-        <ul>
-"""
+        <h1>Commands</h1>
+        <div class="table-responsive text-nowrap">
+        <table class="table table-striped">
+        <colgroup>
+            <col class="col-md-2">
+            <col class="col-md-7">
+        </colgroup>
+        <tbody>
+""")
         i=0
         for key in self.commands.commands.keys():
-            html += "<li>"+self.commands.commands[key].identifier+"<br><button class=\"btn\" onclick=\"ajax('"+self.commands.commands[key].identifier + "', '"+str(i)+"')\">" + self.commands.commands[key].description+"</button>"
-            html += '<input class="form-control" id="input'+str(i)+'" type="text">'
-            html += '<div id="res'+str(i)+'"></div>'
+            html = "<tr>"
+            html += "\t<td><b>" + self.commands.commands[key].description + "</b>\r\n"
+            html += "<br>" + self.commands.commands[key].identifier + "\r\n"
+            html += "\t<br><button class=\"btn btn-secondary\" style=\"background-color: lightgray !important;color: black;\" onclick=\"ajax('"+self.commands.commands[key].identifier + "', '"+str(i)+"')\">" + "Send"+"</button>"+"</td>\r\n"
+            if (self.commands.commands[key].takeParameters):
+                html += '\t<td><input class="form-control" id="input'+str(i)+'" value="'+ str(config.getValue(self.commands.commands[key].configKey))+'" type="text">\r\n'
+                html += '\t<br><div id="res'+str(i)+'"></div></td>\r\n'
+            else:
+                html += '\t<td><div id="res'+str(i)+'"></div></td>\r\n'
+            connectionCli.sendall(html+"</tr>")
             i+=1
-        html +="""
-        </ul>
-        <h2>Commands Bluetooth</h2>
-        <ul>
-"""
-        for key in self.bleCmds.commands.keys():
-            html += "<li>"+self.bleCmds.commands[key].identifier + "<br>"+self.bleCmds.commands[key].description+"</li>"     
-        html += """
-        </ul>
+        connectionCli.sendall("""
+        </tbody>
+        </table>
+        </div>
     </body>
 </html>
-"""
-        return html
+""")

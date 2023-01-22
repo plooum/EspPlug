@@ -14,7 +14,7 @@ class Program:
     def __init__(self):
         self.must_restart = -1
         UTILS.init()
-        self.cmdsWeb = self.createCmds("/?")
+        self.cmdsWeb = self.createCmds("")
         self.pin = PinOut(12)
         self.network = Network(config.getValue(config._wifi_ssid),
                                utils.CIPHER.dec(config.getValue(config._wifi_password)),
@@ -35,6 +35,7 @@ class Program:
             self.blink = True
         else:
             self.blink = False
+        self.run = True
 
     '''
     Ne pas mettre de ',' ni de ";" dans la description d'une commande.
@@ -90,7 +91,7 @@ class Program:
         s = ""
         try:
             for key in self.cmdsWeb.commands.keys():
-                s += self.cmdsWeb.commands[key].identifier + ',' + self.cmdsWeb.commands[key].description + ',' + ("1" if self.cmdsWeb.commands[key].takeParameters else "0" ) + ";"
+                s += self.cmdsWeb.commands[key].identifier + ',' + self.cmdsWeb.commands[key].description + ',' + ("1" if self.cmdsWeb.commands[key].takeParameters else "0" ) + chr(3)
         except Exception as e:
             utils.trace("Main : Error, " + str(e))
         return s
@@ -112,6 +113,8 @@ class Program:
         self.blink = False
         self.led.off()
         self.restart()
+        print("")
+        self.must_restart = time.time()
     
     def btn_pressed_long(self):
         self.changeModeWifi()
@@ -127,7 +130,7 @@ class Program:
     def getCurrentConfig(self):
         ret = ""
         for key in config.config_tab.keys():
-            ret += key + ' : "' + str(config.config_tab[key]) + '"\r\n'
+            ret += key + ' : "' + str(config.config_tab[key]) + '"' + chr(3)
         ret += "config file : " + config.file_config_name;
         return ret
     
@@ -202,10 +205,10 @@ class Program:
         if (self.must_restart > -1):
             if(time.time() - self.must_restart > 3):
                 machine.reset()
-    
+                self.run = False
     def loopMain(self):
-        run = True
-        while run:
+        self.run = True
+        while self.run:
             try:
                 UTILS.freeMemory()
                 self.webServer.update()
@@ -213,7 +216,7 @@ class Program:
                 self.updateRestart()
                 self.updateBlink()
             except KeyboardInterrupt:
-                run = False
+                self.run = False
                 pass
             except Exception as e:
                 utils.trace("Main, Error : " + str(e))

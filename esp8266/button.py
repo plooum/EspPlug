@@ -10,6 +10,7 @@ class Button:
         self.pin = Pin(self.pinNumber, Pin.IN, Pin.PULL_UP)
         self.pin.irq(trigger = Pin.IRQ_FALLING | Pin.IRQ_RISING, handler = self.btn_pressed)
         self.lastExec = 0
+        self.lastPressed = time.ticks_ms()
     
     def btn_pressed(self, irq):
         curMs = time.ticks_ms()

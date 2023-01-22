@@ -52,13 +52,16 @@ class Network:
                 self.wlan.config(essid="sonoff", password="123456789")
     
     def isConnected(self):
+#         if (config.getValue(config._mode_wifi) == 1):
+#             return True
         isConnected = False
         try:
             if (config.getValue(config._mode_wifi) == 0):
                 isConnected = self.wlan.isconnected()
             else:
                 isConnected = self.wlan.active()
-        except:
+        except Exception as e:
+            utils.trace("WIFI : Error, " + str(e))
             pass
         return isConnected
     
@@ -79,11 +82,14 @@ class Network:
                     try:
                         self.connect()
                     except Exception as e: 
-                        utils.trace("WIFI Connect Error : "+str(e))
-                    maxWait = 4
-                    lastTime = time()
-                    while(not(self.isConnected()) and time()-lastTime < maxWait):
-                        sleep(0.1)
+                        utils.trace("WIFI : Connect Error : "+str(e))
+                    if (config.getValue(config._mode_wifi) == 1):
+                        sleep(1)
+                    else:
+                        maxWait = 4
+                        lastTime = time()
+                        while(not(self.isConnected()) and time()-lastTime < maxWait):
+                            sleep(0.1)
                     if(self.isConnected()):
                         utils.trace("WIFI : Connected")
                         utils.trace(str(self.wlan.ifconfig()))
@@ -94,4 +100,4 @@ class Network:
                         if(self.callbackDisconnected() is not None):
                             self.callbackDisconnected()
         except Exception as e: 
-            utils.trace("WIFI Error : "+str(e))
+            utils.trace("WIFI : Error, "+str(e))

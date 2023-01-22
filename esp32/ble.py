@@ -103,8 +103,8 @@ class Ble():
 
     def handleCommand(self,message):
         self.msg += message
-        if(config.getValue(config._cmd_ble_end_char) in self.msg):
-            spl = self.msg.split(config.getValue(config._cmd_ble_end_char))
+        if(config.getValue(config._cmd_end_char) in self.msg):
+            spl = self.msg.split(config.getValue(config._cmd_end_char))
             for completeCmd in spl:
                 for key in self.commands.commands.keys():
                     if key in completeCmd:

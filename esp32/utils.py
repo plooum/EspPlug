@@ -16,30 +16,33 @@ class UTILS:
 class CIPHER:
     @staticmethod
     def enc(msg):
-        ret = ""
-        i=0
-        while i < len(msg):
-            ret += chr(ord(msg[i])+10)
-            i+=1
-        return ret
+        return msg
+#         ret = ""
+#         i=0
+#         while i < len(msg):
+#             ret += chr(ord(msg[i])+10)
+#             i+=1
+#         return ret
     @staticmethod
     def dec(msg):
-        ret = ""
-        i=0
-        while i < len(msg):
-            ret += chr(ord(msg[i])-10)
-            i+=1
-        return ret
+        return msg
+#         ret = ""
+#         i=0
+#         while i < len(msg):
+#             ret += chr(ord(msg[i])-10)
+#             i+=1
+#         return ret
     
 def trace(msg):
     if(config.getValue(config._debug)):
         print(str(time()) +" : "+ msg)
 
 class Command:
-    def __init__(self, identifier, description, target, takeParameters):
+    def __init__(self, identifier, description, target, configKey, takeParameters):
         self.identifier = identifier
         self.description = description
         self.target = target
+        self.configKey = configKey
         self.takeParameters = takeParameters
     
     def execute(self, arg = None):
@@ -59,8 +62,8 @@ class Commands:
     def __init__(self):
         self.commands = {}
     
-    def add(self,identifier, description, target, takeParameters = False):
-        self.commands[identifier] = Command(identifier, description, target, takeParameters)
+    def add(self,identifier, description, target, configKey= "", takeParameters = False):
+        self.commands[identifier] = Command(identifier, description, target, configKey, takeParameters)
         
     def execute(self,identifier, arg = None):
         if identifier in commands.keys():
