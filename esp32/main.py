@@ -36,10 +36,11 @@ class Program:
         self.buttonOnOff = Button(int(config.getValue(config._pin_in)), self.btn_pressed)
         s = Security()
     '''
-    Ne pas mettre de ',' ni de ";" dans la description d'une commande.
+    Ne pas mettre de ',' ni de ";" ni de '\n' dans la description d'une commande.
     Ces caractères sont réservés pour la commande help :
         ',' : permet de séparer les champs "nom","description","nombre de paramètres".
         ';' : permet de séparer les commandes.
+        '\n': permet de terminer une trame uart en BLE
     '''
     def createCmds(self):
         cmds = utils.Commands()
