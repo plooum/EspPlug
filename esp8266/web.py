@@ -83,16 +83,12 @@ class WebServer:
                     connectionCli.close()
             except Exception as e:
                 utils.trace("WebServer : Error, "+str(e))
-
-def sendHtml(self, connectionCli):
+                
+    def sendHtml(self, connectionCli):
         connectionCli.sendall("""
 <!DOCTYPE html>
 <html>
     <head>
-        <meta name="viewport" content="width=device-width, initial-scale=1">
-        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
-        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM" crossorigin="anonymous"></script>
-        
         <script>
             function ajax(url, num){
                 var xhr = new XMLHttpRequest();
@@ -105,9 +101,7 @@ def sendHtml(self, connectionCli):
                 xhr.open("GET", "/?" + url + arg, true);
                 xhr.onload = function(e) {
                     var s = xhr.responseText;
-                    var sa = s.replaceAll(String.fromCharCode(3),"</td></tr><td>");
-                    var sb = sa.replaceAll("|","</td><td>");
-                    document.getElementById("res"+num).innerHTML = "<table><tr><td>" + sb + "</table>";
+                    document.getElementById("res"+num).innerText=s.replaceAll(String.fromCharCode(3),String.fromCharCode(13)+String.fromCharCode(10));
                 }
                 xhr.send();
             }
@@ -115,72 +109,19 @@ def sendHtml(self, connectionCli):
     </head>
     <body>
         <h1>Commands</h1>
-        <div class="table-responsive text-nowrap">
-        <table class="table table-striped">
-        <colgroup>
-            <col class="col-md-2">
-            <col class="col-md-7">
-        </colgroup>
-        <tbody>
+        <ul>
 """)
         i=0
         for key in self.commands.commands.keys():
-            html = "<tr>"
-            html += "\t<td><b>" + self.commands.commands[key].description + "</b>\r\n"
-            html += "<br>" + self.commands.commands[key].identifier + "\r\n"
-            html += "\t<br><button class=\"btn btn-secondary\" style=\"background-color: lightgray !important;color: black;\" onclick=\"ajax('"+self.commands.commands[key].identifier + "', '"+str(i)+"')\">" + "Send"+"</button>"+"</td>\r\n"
+            html = ""
+            html += "<li>"+self.commands.commands[key].identifier+"<br><button class=\"btn\" onclick=\"ajax('"+self.commands.commands[key].identifier + "', '"+str(i)+"')\">" + self.commands.commands[key].description+"</button></li>"
             if (self.commands.commands[key].takeParameters):
-                html += '\t<td><input class="form-control" id="input'+str(i)+'" value="'+ str(config.getValue(self.commands.commands[key].configKey))+'" type="text">\r\n'
-                html += '\t<br><div id="res'+str(i)+'"></div></td>\r\n'
-            else:
-                html += '\t<td><div id="res'+str(i)+'"></div></td>\r\n'
-            connectionCli.sendall(html+"</tr>")
+                html += '<input class="form-control" id="input'+str(i)+'" type="text">'
+            html += '<div id="res'+str(i)+'"></div>\r\n'
+            connectionCli.sendall(html)
             i+=1
         connectionCli.sendall("""
-        </tbody>
-        </table>
-        </div>
+        </ul>
     </body>
 </html>
 """)
-#     def sendHtml(self, connectionCli):
-#         connectionCli.sendall("""
-# <!DOCTYPE html>
-# <html>
-#     <head>
-#         <script>
-#             function ajax(url, num){
-#                 var xhr = new XMLHttpRequest();
-#                 var arg = "";
-#                 try{
-#                     arg = document.getElementById("input" + num).value;
-#                 }catch{}
-#                 arg = arg?"""+'"' + config.getValue(config._cmd_separator) + '"'+"""+arg:"";
-# 
-#                 xhr.open("GET", "/?" + url + arg, true);
-#                 xhr.onload = function(e) {
-#                     var s = xhr.responseText;
-#                     document.getElementById("res"+num).innerText=s.replaceAll(String.fromCharCode(3),String.fromCharCode(13)+String.fromCharCode(10));
-#                 }
-#                 xhr.send();
-#             }
-#         </script>
-#     </head>
-#     <body>
-#         <h1>Commands</h1>
-#         <ul>
-# """)
-#         i=0
-#         for key in self.commands.commands.keys():
-#             html = ""
-#             html += "<li>"+self.commands.commands[key].identifier+"<br><button class=\"btn\" onclick=\"ajax('"+self.commands.commands[key].identifier + "', '"+str(i)+"')\">" + self.commands.commands[key].description+"</button></li>"
-#             if (self.commands.commands[key].takeParameters):
-#                 html += '<input class="form-control" id="input'+str(i)+'" type="text">'
-#             html += '<div id="res'+str(i)+'"></div>\r\n'
-#             connectionCli.sendall(html)
-#             i+=1
-#         connectionCli.sendall("""
-#         </ul>
-#     </body>
-# </html>
-# """)

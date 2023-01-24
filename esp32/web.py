@@ -63,9 +63,18 @@ class WebServer:
                                                     cnt = len(args)
                                                     for i in range(2, cnt):
                                                         argv += config.getValue(config._cmd_separator) + args[i]
-                                                    returnValue = self.commands.commands[key].execute(argv)
+                                                    try:
+                                                        returnValue = self.commands.commands[key].execute(argv)
+                                                    except:
+                                                        hasError = True
                                                 else:
-                                                    returnValue = self.commands.commands[key].execute()
+                                                    try:
+                                                        returnValue = self.commands.commands[key].execute("")
+                                                    except:
+                                                        try:
+                                                            returnValue = self.commands.commands[key].execute(None)
+                                                        except:
+                                                            hasError = True
                                                 if returnValue is not None:
                                                     hasReturnValue = True
                                                     connectionCli.sendall(str(returnValue))

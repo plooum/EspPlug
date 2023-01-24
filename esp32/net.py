@@ -4,7 +4,7 @@ import _thread
 import utils
 
 class Network:
-    def __init__(self,ssid, password, ip, mask, gw, dns, callbackConnected, callbackDisconnected):
+    def __init__(self,ssid, password, ip, mask, gw, dns, callbackConnected, callbackDisconnected, dhcp = False):
         self._ssid = ssid
         self._password = password
         self._ip = ip
@@ -22,6 +22,9 @@ class Network:
             if len(ips) > 2:
                 self._dns = ips[0] + '.' + ips[1] + '.' +ips[2] + '.1' 
         self.wlan = network.WLAN(network.STA_IF)
+        self.wlan.active(True)
+        if not(dhcp):
+            self.wlan.ifconfig((self._ip, self._mask, self._gw, self._dns))
         self.lastConnectionAttempt = -10000
         self.nbSecondsBetweenAttempts = 600
         self.callbackConnected = callbackConnected
@@ -34,9 +37,6 @@ class Network:
         if((time() - self.lastConnectionAttempt) > self.nbSecondsBetweenAttempts):
             self.lastConnectionAttempt = time()
             utils.trace("WIFI : Connecting")
-            self.wlan = network.WLAN(network.STA_IF)
-            self.wlan.ifconfig((self._ip, self._mask, self._gw, self._dns)) # IP fixe sinon supprimer la ligne
-            self.wlan.active(True)
             self.wlan.connect(self._ssid, self._password)
     
     def isConnected(self):

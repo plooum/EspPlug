@@ -117,14 +117,17 @@ class Ble():
                             for i in range(2, cnt):
                                 argv += config.getValue(config._cmd_separator) + args[i]
                             try:
-                                res = self.commands.commands[key].execute(args[1])
+                                res = self.commands.commands[key].execute(argv)
                             except:
                                 error = True
                         else:
                             try:
-                                res = self.commands.commands[key].execute(None)
+                                res = self.commands.commands[key].execute("")
                             except:
-                                error = True
+                                try:
+                                    res = self.commands.commands[key].execute(None)
+                                except:
+                                    error = True
                         if res is not None:
                             self.send(res)   
                             res = ""
