@@ -34,6 +34,8 @@ class Network:
                 pass
         else:
             self.wlan = network.WLAN(network.STA_IF)
+            if (self._ip_fixe):
+                self.wlan.ifconfig((self._ip, self._mask, self._gw, self._dns)) # IP fixe sinon supprimer la ligne
             self.wlan.active(True)
         self.lastConnectionAttempt = -10000
         self.nbSecondsBetweenAttempts = 600
@@ -46,8 +48,6 @@ class Network:
             if((time() - self.lastConnectionAttempt) > self.nbSecondsBetweenAttempts):
                 self.lastConnectionAttempt = time()
                 utils.trace("WIFI : Connecting")
-                if (self._ip_fixe):
-                    self.wlan.ifconfig((self._ip, self._mask, self._gw, self._dns)) # IP fixe sinon supprimer la ligne
                 self.wlan.connect(self._ssid, self._password)
         else:
             self.falgIsConnected = True
