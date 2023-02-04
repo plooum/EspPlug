@@ -3,10 +3,11 @@ import network
 import utils
 import config
 
+stopUpdate = False
+
 class Network:
-    def __init__(self,ssid, password, ip, mask, gw, dns, callbackConnected, callbackDisconnected, ip_fixe = False):
+    def __init__(self,ssid, password, ip, mask, gw, dns, callbackConnected, callbackDisconnected):
         self.falgIsConnected = False
-        self._ip_fixe = ip_fixe
         self._ssid = ssid
         self._password = password
         self._ip = ip
@@ -34,9 +35,9 @@ class Network:
                 pass
         else:
             self.wlan = network.WLAN(network.STA_IF)
-            if (self._ip_fixe):
-                self.wlan.ifconfig((self._ip, self._mask, self._gw, self._dns)) # IP fixe sinon supprimer la ligne
             self.wlan.active(True)
+            if (self._ip is not None and self._ip != ""):
+                self.wlan.ifconfig((self._ip, self._mask, self._gw, self._dns)) # IP fixe sinon supprimer la ligne
         self.lastConnectionAttempt = -10000
         self.nbSecondsBetweenAttempts = 600
         self.stop_ = False
@@ -75,27 +76,41 @@ class Network:
     def isRunning(self):
         return not (self.stop_)
     
+    def startOnce(self):
+        self.connect()
+        if (config.getValue(config._mode_wifi) == 0):
+            maxWait = 15
+            lastTime = time()
+            while(not(self.isConnected()) and time()-lastTime < maxWait):
+                sleep(0.1)
+            utils.trace(str(self.wlan.ifconfig()))
+        if(self.callbackConnected() is not None):
+            self.callbackConnected()
+
     def update(self):
+        global stopUpdate
         try:
-            if(self.isRunning()):
-                if(not (self.isConnected())):
-                    try:
-                        self.connect()
-                    except Exception as e: 
-                        utils.trace("WIFI : Connect Error : "+str(e))
-                    if (config.getValue(config._mode_wifi) == 0):
-                        maxWait = 4
-                        lastTime = time()
-                        while(not(self.isConnected()) and time()-lastTime < maxWait):
-                            sleep(0.1)
-                    if(self.isConnected()):
-                        utils.trace("WIFI : Connected")
-                        utils.trace(str(self.wlan.ifconfig()))
-                        if(self.callbackConnected() is not None):
-                            self.callbackConnected()
-                    else:
-                        utils.trace("WIFI : Unable to connect")
-                        if(self.callbackDisconnected() is not None):
-                            self.callbackDisconnected()
+            if(not (stopUpdate)):
+                if(self.isRunning()):
+                    if(not (self.isConnected())):
+                        try:
+                            self.connect()
+                        except Exception as e: 
+                            utils.trace("WIFI : Connect Error : "+str(e))
+                        if (config.getValue(config._mode_wifi) == 0):
+                            maxWait = 5
+                            lastTime = time()
+                            while(not(self.isConnected()) and time()-lastTime < maxWait):
+                                sleep(0.1)
+                        if(self.isConnected()):
+                            utils.trace("WIFI : Connected")
+                            utils.trace(str(self.wlan.ifconfig()))
+                            if(self.callbackConnected() is not None):
+                                self.callbackConnected()
+                                stopUpdate = True
+                        else:
+                            utils.trace("WIFI : Unable to connect")
+                            if(self.callbackDisconnected() is not None):
+                                self.callbackDisconnected()
         except Exception as e: 
             utils.trace("WIFI : Error, "+str(e))

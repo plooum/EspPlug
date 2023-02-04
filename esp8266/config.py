@@ -21,6 +21,7 @@ _cmd_separator = "cmd_separator"
 _cmd_ble_end_char = "cmd_ble_end_char"
 _debug = "debug"
 _pin_button_toggle_on_off = "pin_button_toggle_on_off"
+_pin_led = "pin_led"
 _mode_wifi = "mode_wifi"
 
 config_keys.append(_wifi_ssid)
@@ -36,6 +37,7 @@ config_keys.append(_cmd_ble_end_char)
 config_keys.append(_debug)
 config_keys.append(_pin_button_toggle_on_off)
 config_keys.append(_mode_wifi)
+config_keys.append(_pin_led)
 config_keys.sort()
 
 def loadDefaultValues():
@@ -43,7 +45,7 @@ def loadDefaultValues():
     if(not(_pinout_num in config_tab.keys()) or str(config_tab[_pinout_num]) == ""):
         config_tab[_pinout_num] = 12
     if(not(_ble_name in config_tab.keys()) or str(config_tab[_ble_name]) == ""):
-        config_tab[_ble_name] = "ESP32"
+        config_tab[_ble_name] = "ESP8266"
     if(not(_cmd_separator in config_tab.keys()) or str(config_tab[_cmd_separator]) == ""):
         config_tab[_cmd_separator] = "="
     if(not(_cmd_ble_end_char in config_tab.keys()) or str(config_tab[_cmd_ble_end_char]) == ""):
@@ -51,9 +53,11 @@ def loadDefaultValues():
     if(not(_debug in config_tab.keys()) or str(config_tab[_debug]) == ""):
         config_tab[_debug] = True
     if(not(_pin_button_toggle_on_off in config_tab.keys()) or str(config_tab[_pin_button_toggle_on_off]) == ""):
-        config_tab[_pin_button_toggle_on_off] = 0
+        config_tab[_pin_button_toggle_on_off] = 0 #13
     if(not(_mode_wifi in config_tab.keys()) or str(config_tab[_mode_wifi]) == ""):
         config_tab[_mode_wifi] = 1
+    if(not(_pin_led in config_tab.keys()) or str(config_tab[_pin_led]) == ""):
+        config_tab[_pin_led] = 5 #13
     for key in config_keys:
         if(not(key in config_tab.keys())):
             config_tab[key] = ""

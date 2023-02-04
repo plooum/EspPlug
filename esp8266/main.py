@@ -7,15 +7,13 @@ import utils
 import time
 import machine
 from button import Button
-from security import Security
-import sys
 
 class Program:
     def __init__(self):
         self.must_restart = -1
         UTILS.init()
         self.cmdsWeb = self.createCmds("")
-        self.pin = PinOut(12)
+        self.pin = PinOut(int(config.getValue(config._pinout_num)))
         self.network = Network(config.getValue(config._wifi_ssid),
                                utils.CIPHER.dec(config.getValue(config._wifi_password)),
                                config.getValue(config._wifi_ip),
@@ -24,11 +22,10 @@ class Program:
                                config.getValue(config._wifi_dns),
                                self.startWebServer,
                                self.stopWebServer)
-        self.cmdsBle = {}
-        self.webServer = WebServer(80, self.cmdsWeb, self.cmdsBle)
+        self.webServer = WebServer(80, self.cmdsWeb)
         self.startNetwork()
-        self.buttonOnOff = Button(config.getValue(config._pin_button_toggle_on_off), self.btn_pressed_short, self.btn_pressed_long)
-        self.led = PinOut(13)
+        self.buttonOnOff = Button(int(config.getValue(config._pin_button_toggle_on_off)), self.btn_pressed_short, self.btn_pressed_long)
+        self.led = PinOut(int(config.getValue(config._pin_led)))
         self.led.on() # c'est inversé sur les sonoff basic R2
         self.lastBlink = time.ticks_ms();
         if (config.getValue(config._mode_wifi) == 1):
@@ -45,28 +42,26 @@ class Program:
     '''
     def createCmds(self,prefix = ""):
         cmds = utils.Commands()
+        cmds.add(prefix+"009-g_status", "get pin status", self.getPinStatus)
+        cmds.add(prefix+"010-s_on", "set output on", self.pinOn)
+        cmds.add(prefix+"011-s_off", "set output off", self.pinOff)
+        cmds.add(prefix+"040-s_pin_out0", "set pin out1 number (relay)", self.setPinOut0, config._pinout_num, True)
+        cmds.add(prefix+"041-s_pin_in0", "set pin in number (button)", self.setPinIn0, config._pin_button_toggle_on_off, True)
+        cmds.add(prefix+"042-s_pin_outLed", "set pin out2 number (led, sonoff : 13, moes : 5)", self.setPinOutLed, config._pin_led, True)
         cmds.add(prefix+"050-s_ssid", "set wifi ssid", self.setWifiSsid, config._wifi_ssid, True)
         cmds.add(prefix+"051-s_pass", "set wifi password", self.setWifiPassword, config._wifi_password, True)
-#         cmds.add(prefix+"s_ip", "set wifi ip", self.setWifiIp, True)
-#         cmds.add(prefix+"s_mask", "set wifi mask", self.setWifiMask, True)
-#         cmds.add(prefix+"s_gw", "set wifi gw", self.setWifiGw, True)
-#         cmds.add(prefix+"s_dns", "set wifi dns", self.setWifiDns, True)
-#         cmds.add(prefix+"s_pin_num", "set pin out number", self.setPinOut, True)
-#         cmds.add(prefix+"s_blename", "set bluetooth name", self.setPinBleName, True)
-#         cmds.add(prefix+"s_sep", "set command argument separator", self.setCmdSep, True)
-#         cmds.add(prefix+"s_endc", "set bluetooth command terminator character", self.setCmdEndChar, True)
-        cmds.add(prefix+"250-restart", "restart", self.restart)
-        cmds.add(prefix+"220-save", "save config", self.saveConfig)
-        cmds.add(prefix+"191-s_meta", "use another config file", self.setConfFile, "", True)
-        cmds.add(prefix+"009-g_status", "get pin status", self.getPinStatus)
-        cmds.add(prefix+"011-s_off", "set output off", self.pinOff)
-        cmds.add(prefix+"010-s_on", "set output on", self.pinOn)
-        cmds.add(prefix+"200-g_config", "get current config", self.getCurrentConfig)
+        cmds.add(prefix+"052-s_ip", "set wifi ip", self.setWifiIp, config._wifi_ip, True)
+        cmds.add(prefix+"053-s_mask", "set wifi mask", self.setWifiMask, config._wifi_mask, True)
+        cmds.add(prefix+"054-s_gw", "set wifi gw", self.setWifiGw, config._wifi_gw, True)
+        cmds.add(prefix+"055-s_dns", "set wifi dns", self.setWifiDns, config._wifi_dns, True)
         cmds.add(prefix+"182-s_debug", "set debug flag", self.setDebug, config._debug, True)
+        cmds.add(prefix+"191-s_meta", "use another config file", self.setConfFile, "", True)
+        cmds.add(prefix+"200-g_config", "get current config", self.getCurrentConfig, "", False, True)
         cmds.add(prefix+"210-load_config", "reload config from current file", self.loadConfig)
-        cmds.add(prefix+"help", "get all available commands", self.getAllCommands)
-#         cmds.add(prefix+"s_blepass", "set the bluetooth password", self.setBlePassword, True)
-        cmds.add(prefix+"049-wifimode", "toggle change the wifi mode", self.changeModeWifi)
+        cmds.add(prefix+"220-save", "save config", self.saveConfig)
+        cmds.add(prefix+"250-restart", "restart", self.restart)
+        cmds.add(prefix+"260-wifimode", "change the wifi mode", self.changeModeWifi)
+        cmds.add(prefix+"help", "help", self.getAllCommands, "", False, True)
         cmds.sort()
         return cmds
     
@@ -87,14 +82,14 @@ class Program:
         if (not(s.change(newPassword))):
             raise Exception("")
         
-    def getAllCommands(self):
+    def getAllCommands(self, sendCallback):
         s = ""
+        i = 0
         try:
             for key in self.cmdsWeb.commands.keys():
-                s += self.cmdsWeb.commands[key].identifier + ',' + self.cmdsWeb.commands[key].description + ',' + ("1" if self.cmdsWeb.commands[key].takeParameters else "0" ) + chr(3)
+                sendCallback(self.cmdsWeb.commands[key].identifier + '|' + self.cmdsWeb.commands[key].description + '|' + ("1" if self.cmdsWeb.commands[key].takeParameters else "0" ) + chr(3))
         except Exception as e:
             utils.trace("Main : Error, " + str(e))
-        return s
     
     def btn_pressed_short(self):
         if self.pin.getValue():
@@ -127,12 +122,10 @@ class Program:
             config.setValue(True, config._debug)
         else:
             config.setValue(False, config._debug)
-    def getCurrentConfig(self):
-        ret = ""
+    def getCurrentConfig(self, sendCallback):
         for key in config.config_tab.keys():
-            ret += key + ' : "' + str(config.config_tab[key]) + '"' + chr(3)
-        ret += "config file : " + config.file_config_name;
-        return ret
+            sendCallback(key + '|"' + str(config.config_tab[key]) + '"' + chr(3))
+        sendCallback('config file|"' + config.file_config_name + '"')
     
     def getPinStatus(self):
         if self.pin.getValue():
@@ -167,8 +160,14 @@ class Program:
     def setWifiDns(self, dns):
         config.setValue(dns, config._wifi_dns)
         
-    def setPinOut(self, pinout_num):
+    def setPinOut0(self, pinout_num):
         config.setValue(pinout_num, config._pinout_num)
+    
+    def setPinIn0(self, pinin_num):
+        config.setValue(pinin_num, config._pin_button_toggle_on_off)
+
+    def setPinOutLed(self, pinout_num):
+        config.setValue(pinout_num, config._pin_led)
         
     def setPinBleName(self, ble_name):
         config.setValue(ble_name, config._ble_name)
@@ -207,12 +206,13 @@ class Program:
                 machine.reset()
                 self.run = False
     def loopMain(self):
+        self.network.startOnce()
         self.run = True
         while self.run:
             try:
                 UTILS.freeMemory()
                 self.webServer.update()
-                self.network.update()
+#                 self.network.update()
                 self.updateRestart()
                 self.updateBlink()
             except KeyboardInterrupt:
