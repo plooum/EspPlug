@@ -1,0 +1,1 @@
+{"ble_name": "MOES_TEST", "cmd_ble_end_char": ";", "cmd_separator": "=", "debug": true, "mode_wifi": 0, "pin_button_toggle_on_off": 13, "pin_led": "5", "pinout_num": 12, "wifi_dns": "", "wifi_gw": "", "wifi_ip": "192.168.1.111", "wifi_mask": "", "wifi_password": "password", "wifi_ssid": "wifi"}

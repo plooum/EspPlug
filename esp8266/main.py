@@ -10,6 +10,7 @@ from button import Button
 
 class Program:
     def __init__(self):
+        self.first_run = True
         self.must_restart = -1
         UTILS.init()
         self.cmdsWeb = self.createCmds("")
@@ -26,36 +27,37 @@ class Program:
         self.startNetwork()
         self.buttonOnOff = Button(int(config.getValue(config._pin_button_toggle_on_off)), self.btn_pressed_short, self.btn_pressed_long)
         self.led = PinOut(int(config.getValue(config._pin_led)))
-        self.led.on() # c'est inversé sur les sonoff basic R2
+        self.led.on() # c'est inversé sur les sonoff basic R2 et les moes
         self.lastBlink = time.ticks_ms();
+        self.blinkSpeed = 500
+        self.start_blink_connected = time.time()
+        self.blinkDuration = 0
+        self.blink = False
         if (config.getValue(config._mode_wifi) == 1):
-            self.blink = True
-        else:
-            self.blink = False
+            self.startBlink(500)
+        self.oldConnectionState = False
         self.run = True
+        self.startDisconnected = False
+        self.startDisconnecting = 0
 
-    '''
-    Ne pas mettre de ',' ni de ";" dans la description d'une commande.
-    Ces caractères sont réservés pour la commande help :
-        ',' : permet de séparer les champs "nom","description","nombre de paramètres".
-        ';' : permet de séparer les commandes.
-    '''
     def createCmds(self,prefix = ""):
         cmds = utils.Commands()
+        cmds.add(prefix+"000-s_name", "set name", self.setName,config._ble_name, True)
+        cmds.add(prefix+"001-g_name", "get name", self.getName, "", False, True)
         cmds.add(prefix+"009-g_status", "get pin status", self.getPinStatus)
         cmds.add(prefix+"010-s_on", "set output on", self.pinOn)
         cmds.add(prefix+"011-s_off", "set output off", self.pinOff)
-        cmds.add(prefix+"040-s_pin_out0", "set pin out1 number (relay)", self.setPinOut0, config._pinout_num, True)
-        cmds.add(prefix+"041-s_pin_in0", "set pin in number (button)", self.setPinIn0, config._pin_button_toggle_on_off, True)
+#         cmds.add(prefix+"040-s_pin_out0", "set pin out1 number (relay)", self.setPinOut0, config._pinout_num, True)
+        cmds.add(prefix+"041-s_pin_in0", "set pin in0 number(button, sonoff : 0, moes :13)", self.setPinIn0, config._pin_button_toggle_on_off, True)
         cmds.add(prefix+"042-s_pin_outLed", "set pin out2 number (led, sonoff : 13, moes : 5)", self.setPinOutLed, config._pin_led, True)
         cmds.add(prefix+"050-s_ssid", "set wifi ssid", self.setWifiSsid, config._wifi_ssid, True)
         cmds.add(prefix+"051-s_pass", "set wifi password", self.setWifiPassword, config._wifi_password, True)
         cmds.add(prefix+"052-s_ip", "set wifi ip", self.setWifiIp, config._wifi_ip, True)
         cmds.add(prefix+"053-s_mask", "set wifi mask", self.setWifiMask, config._wifi_mask, True)
-        cmds.add(prefix+"054-s_gw", "set wifi gw", self.setWifiGw, config._wifi_gw, True)
-        cmds.add(prefix+"055-s_dns", "set wifi dns", self.setWifiDns, config._wifi_dns, True)
-        cmds.add(prefix+"182-s_debug", "set debug flag", self.setDebug, config._debug, True)
-        cmds.add(prefix+"191-s_meta", "use another config file", self.setConfFile, "", True)
+#         cmds.add(prefix+"054-s_gw", "set wifi gw", self.setWifiGw, config._wifi_gw, True)
+#         cmds.add(prefix+"055-s_dns", "set wifi dns", self.setWifiDns, config._wifi_dns, True)
+#         cmds.add(prefix+"182-s_debug", "set debug flag", self.setDebug, config._debug, True)
+#         cmds.add(prefix+"191-s_meta", "use another config file", self.setConfFile, "", True)
         cmds.add(prefix+"200-g_config", "get current config", self.getCurrentConfig, "", False, True)
         cmds.add(prefix+"210-load_config", "reload config from current file", self.loadConfig)
         cmds.add(prefix+"220-save", "save config", self.saveConfig)
@@ -65,26 +67,35 @@ class Program:
         cmds.sort()
         return cmds
     
+    def startBlink(self, speed, duration = -1):
+        self.blink = True
+        self.blinkSpeed = speed
+        self.blinkDuration = duration
+    
+    def surveyStopBlink(self):
+        if(self.blinkDuration > 0):
+            if(time.time() - self.start_blink_connected > 10):
+                self.blink = False
+                self.led.on()
+    
     def updateBlink(self):
         if(self.blink):
             cur_ms = time.ticks_ms()
             if(cur_ms < self.lastBlink):
                 self.lastBlink = 0;
-            if(cur_ms - self.lastBlink > 500):
+            if(cur_ms - self.lastBlink > self.blinkSpeed):
                 self.lastBlink = cur_ms
                 if self.led.getValue():
                     self.led.off()
                 else:
                     self.led.on()
+    def setName(self, ble_name):
+        config.setValue(ble_name, config._ble_name)
+     
+    def getName(self, sendCallback):
+        sendCallback(config.getValue(config._ble_name))
     
-    def setBlePassword(self, newPassword):
-        s = Security()
-        if (not(s.change(newPassword))):
-            raise Exception("")
-        
     def getAllCommands(self, sendCallback):
-        s = ""
-        i = 0
         try:
             for key in self.cmdsWeb.commands.keys():
                 sendCallback(self.cmdsWeb.commands[key].identifier + '|' + self.cmdsWeb.commands[key].description + '|' + ("1" if self.cmdsWeb.commands[key].takeParameters else "0" ) + chr(3))
@@ -109,7 +120,6 @@ class Program:
         self.led.off()
         self.restart()
         print("")
-        self.must_restart = time.time()
     
     def btn_pressed_long(self):
         self.changeModeWifi()
@@ -133,8 +143,8 @@ class Program:
         else:
             return "0"
         
-    def setConfFile(self,name):
-        config.setMetaConf(name)
+#     def setConfFile(self,name):
+#         config.setMetaConf(name)
         
     def saveConfig(self):
         config.writeFile()
@@ -154,15 +164,6 @@ class Program:
     def setWifiMask(self, mask):
         config.setValue(mask, config._wifi_mask)
         
-    def setWifiGw(self, gw):
-        config.setValue(gw, config._wifi_gw)
-        
-    def setWifiDns(self, dns):
-        config.setValue(dns, config._wifi_dns)
-        
-    def setPinOut0(self, pinout_num):
-        config.setValue(pinout_num, config._pinout_num)
-    
     def setPinIn0(self, pinin_num):
         config.setValue(pinin_num, config._pin_button_toggle_on_off)
 
@@ -205,6 +206,35 @@ class Program:
             if(time.time() - self.must_restart > 3):
                 machine.reset()
                 self.run = False
+    
+    def updateSurveyConnectionState(self):
+        if (config.getValue(config._mode_wifi) == 0):
+            state = self.network.isConnected()
+            disconnected = False
+            if (not(self.oldConnectionState) and state):
+                self.startBlink(100,5)
+                self.oldConnectionState = True
+                self.startDisconnected = False
+            elif(self.oldConnectionState and not(state)):
+                self.oldConnectionState = False
+                disconnected = True
+            elif(self.first_run and not(state)):
+                disconnected = True
+
+            cur = time.time()
+
+            if (disconnected):
+                if(not(self.startDisconnected)):
+                    self.startDisconnecting = cur
+                    self.startDisconnected = True
+
+            if(self.startDisconnected):
+                if(self.startDisconnecting > cur):
+                    self.startDisconnecting = cur
+                dif = cur - self.startDisconnecting
+                if(dif > 30):
+                    self.changeModeWifi()
+    
     def loopMain(self):
         self.network.startOnce()
         self.run = True
@@ -212,9 +242,13 @@ class Program:
             try:
                 UTILS.freeMemory()
                 self.webServer.update()
-#                 self.network.update()
                 self.updateRestart()
                 self.updateBlink()
+                self.surveyStopBlink()
+                self.buttonOnOff.update()
+                self.updateSurveyConnectionState()
+                self.first_run = False
+                time.sleep(0.05)
             except KeyboardInterrupt:
                 self.run = False
                 pass

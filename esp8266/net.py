@@ -27,10 +27,10 @@ class Network:
         self.callbackConnected = callbackConnected
         self.callbackDisconnected = callbackDisconnected
         if (config.getValue(config._mode_wifi) == 1):
-            utils.trace("WIFI : init AP -> SSID = sonoff, Pass = 123456789")
+            utils.trace("WIFI : Access Point -> SSID = pouley, Pass = 12345678")
             self.wlan = network.WLAN(network.AP_IF)
             self.wlan.active(True)                
-            self.wlan.config(essid="sonoff", password="123456789")
+            self.wlan.config(essid="pouley", password="12345678")
             while not(self.wlan.active()):
                 pass
         else:
@@ -38,18 +38,12 @@ class Network:
             self.wlan.active(True)
             if (self._ip is not None and self._ip != ""):
                 self.wlan.ifconfig((self._ip, self._mask, self._gw, self._dns)) # IP fixe sinon supprimer la ligne
-        self.lastConnectionAttempt = -10000
-        self.nbSecondsBetweenAttempts = 600
         self.stop_ = False
         
     def connect(self):
         if (config.getValue(config._mode_wifi) == 0):
-            if(self.lastConnectionAttempt > time()):
-                self.lastConnectionAttempt = -10000
-            if((time() - self.lastConnectionAttempt) > self.nbSecondsBetweenAttempts):
-                self.lastConnectionAttempt = time()
-                utils.trace("WIFI : Connecting")
-                self.wlan.connect(self._ssid, self._password)
+            utils.trace("WIFI : Connecting")
+            self.wlan.connect(self._ssid, self._password)
         else:
             self.falgIsConnected = True
     
@@ -79,10 +73,9 @@ class Network:
     def startOnce(self):
         self.connect()
         if (config.getValue(config._mode_wifi) == 0):
-            maxWait = 15
             lastTime = time()
-            while(not(self.isConnected()) and time()-lastTime < maxWait):
-                sleep(0.1)
+            while(not(self.isConnected()) and time()-lastTime < 30):
+                sleep(1)
             utils.trace(str(self.wlan.ifconfig()))
         if(self.callbackConnected() is not None):
             self.callbackConnected()
