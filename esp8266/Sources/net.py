@@ -6,7 +6,8 @@ import config
 stopUpdate = False
 
 class Network:
-    def __init__(self,ssid, password, ip, mask, gw, dns, callbackConnected, callbackDisconnected):
+    def __init__(self,ssid, password, ip, mask, gw, dns, callbackConnected, callbackDisconnected, fallbackCallback):
+        self.fallbackCallback = fallbackCallback
         self.falgIsConnected = False
         self._ssid = ssid
         self._password = password
@@ -27,17 +28,20 @@ class Network:
         self.callbackConnected = callbackConnected
         self.callbackDisconnected = callbackDisconnected
         if (config.getValue(config._mode_wifi) == 1):
-            utils.trace("WIFI : Access Point -> SSID = pouley, Pass = 12345678")
-            self.wlan = network.WLAN(network.AP_IF)
-            self.wlan.active(True)                
-            self.wlan.config(essid="pouley", password="12345678")
-            while not(self.wlan.active()):
-                pass
+            try:
+                utils.trace("WIFI : AP, SSID="+config.getValue(config._name)+", Pass=12345678")
+                self.wlan = network.WLAN(network.AP_IF)
+                self.wlan.active(True)
+                self.wlan.config(essid=config.getValue(config._name), password="12345678")
+                while not(self.wlan.active()):
+                    pass
+            except:
+                self.fallbackCallback()
         else:
             self.wlan = network.WLAN(network.STA_IF)
             self.wlan.active(True)
             if (self._ip is not None and self._ip != ""):
-                self.wlan.ifconfig((self._ip, self._mask, self._gw, self._dns)) # IP fixe sinon supprimer la ligne
+                self.wlan.ifconfig((self._ip, self._mask, self._gw, self._dns))
         self.stop_ = False
         
     def connect(self):
@@ -52,8 +56,7 @@ class Network:
             isConnected = False
             try:
                 isConnected = self.wlan.isconnected()
-            except Exception as e:
-                utils.trace("WIFI : Error, " + str(e))
+            except Exception:
                 pass
             return isConnected
         else:
@@ -88,8 +91,8 @@ class Network:
                     if(not (self.isConnected())):
                         try:
                             self.connect()
-                        except Exception as e: 
-                            utils.trace("WIFI : Connect Error : "+str(e))
+                        except Exception:
+                            pass
                         if (config.getValue(config._mode_wifi) == 0):
                             maxWait = 5
                             lastTime = time()
@@ -105,5 +108,5 @@ class Network:
                             utils.trace("WIFI : Unable to connect")
                             if(self.callbackDisconnected() is not None):
                                 self.callbackDisconnected()
-        except Exception as e: 
-            utils.trace("WIFI : Error, "+str(e))
+        except Exception:
+            pass

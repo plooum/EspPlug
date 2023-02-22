@@ -37,7 +37,8 @@ class WebServer:
                     pass
                 if (connectionCli is not None):
                     self.curCli = connectionCli
-                    utils.trace("WebServer : Request reveived from : " + str(address))
+                    utils.trace("WebServer : Request from : " + str(address))
+                    utils.lastConnected = time.time()
                     connectionCli.settimeout(1)
                     request = None
                     try:
@@ -98,8 +99,8 @@ class WebServer:
                             self.sendHtml(connectionCli) 
                         connectionCli.close()
                     self.curCli = None
-            except Exception as e:
-                utils.trace("WebServer : Error, "+str(e))
+            except Exception:
+                pass
                 
     def send(self, msg):
         self.curCli.sendall(str(msg))
@@ -110,7 +111,7 @@ class WebServer:
                 line = line.replace("\n", "")
                 line = line.replace("\r", "")
                 if(line == "%title%"):
-                    connectionCli.sendall(config.getValue(config._ble_name))
+                    connectionCli.sendall(config.getValue(config._name))
                 elif(line == "%commands%"):
                     i=0
                     for key in self.commands.commands.keys():

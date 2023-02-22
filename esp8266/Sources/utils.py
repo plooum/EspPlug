@@ -4,6 +4,8 @@ from time import time
 import config
 import collections
 
+lastConnected = 0
+resetPending = False
 class UTILS:
     @staticmethod
     def init():
@@ -48,20 +50,22 @@ class Command:
     
     def executeCallback(self, callback):
         if(self.target is not None):
-            trace("Command : executing, " + self.identifier)
+#             trace("Command : executing, " + self.identifier)
             self.target(callback)
             
     def execute(self, arg = None):
+        trace("Command : executing, " + self.identifier)
         if(self.target is not None):
-            if(arg is None):
-                trace("Command : executing, " + self.identifier)
-                if self.takeParameters:
+            if(self.takeParameters):
+                if (arg is None):
+                    trace("arg : None")
                     return self.target("")
                 else:
-                    return self.target()
+                    trace("arg : " + str(arg))
+                    return self.target(arg)
             else:
-                trace("Command : executing, " + self.identifier + ", arg = " + str(arg))
-                return self.target(arg)
+                trace("no param")
+                return self.target()
         return None
                 
 class Commands:

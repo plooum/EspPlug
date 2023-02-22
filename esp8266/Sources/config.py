@@ -16,11 +16,11 @@ _wifi_mask = "wifi_mask"
 _wifi_gw = "wifi_gw"
 _wifi_dns = "wifi_dns"
 _pinout_num = "pinout_num"
-_ble_name = "ble_name"
+_name = "name"
 _cmd_separator = "cmd_separator"
 _cmd_ble_end_char = "cmd_ble_end_char"
 _debug = "debug"
-_pin_button_toggle_on_off = "pin_button_toggle_on_off"
+_pin_button = "pin_button"
 _pin_led = "pin_led"
 _mode_wifi = "mode_wifi"
 
@@ -31,11 +31,11 @@ config_keys.append(_wifi_mask)
 config_keys.append(_wifi_gw)
 config_keys.append(_wifi_dns)
 config_keys.append(_pinout_num)
-config_keys.append(_ble_name)
+config_keys.append(_name)
 config_keys.append(_cmd_separator)
 config_keys.append(_cmd_ble_end_char)
 config_keys.append(_debug)
-config_keys.append(_pin_button_toggle_on_off)
+config_keys.append(_pin_button)
 config_keys.append(_mode_wifi)
 config_keys.append(_pin_led)
 config_keys.sort()
@@ -44,20 +44,20 @@ def loadDefaultValues():
     global config_tab
     if(not(_pinout_num in config_tab.keys()) or str(config_tab[_pinout_num]) == ""):
         config_tab[_pinout_num] = 12
-    if(not(_ble_name in config_tab.keys()) or str(config_tab[_ble_name]) == ""):
-        config_tab[_ble_name] = "ESP8266"
+    if(not(_name in config_tab.keys()) or str(config_tab[_name]) == ""):
+        config_tab[_name] = "PL"
     if(not(_cmd_separator in config_tab.keys()) or str(config_tab[_cmd_separator]) == ""):
         config_tab[_cmd_separator] = "="
     if(not(_cmd_ble_end_char in config_tab.keys()) or str(config_tab[_cmd_ble_end_char]) == ""):
         config_tab[_cmd_ble_end_char] = ";"
     if(not(_debug in config_tab.keys()) or str(config_tab[_debug]) == ""):
         config_tab[_debug] = True
-    if(not(_pin_button_toggle_on_off in config_tab.keys()) or str(config_tab[_pin_button_toggle_on_off]) == ""):
-        config_tab[_pin_button_toggle_on_off] = 0 #13
+    if(not(_pin_button in config_tab.keys()) or str(config_tab[_pin_button]) == ""):
+        config_tab[_pin_button] = 0 #13
     if(not(_mode_wifi in config_tab.keys()) or str(config_tab[_mode_wifi]) == ""):
         config_tab[_mode_wifi] = 1
     if(not(_pin_led in config_tab.keys()) or str(config_tab[_pin_led]) == ""):
-        config_tab[_pin_led] = 5 #13
+        config_tab[_pin_led] = 13 #5
     for key in config_keys:
         if(not(key in config_tab.keys())):
             config_tab[key] = ""
@@ -89,8 +89,7 @@ def readFile():
         s = f.read()
         config_tab = json.loads(s)
         loadDefaultValues()
-    except Exception as e:
-        utils.trace("Config : Error, " + str(e))
+    except Exception:
         config_tab = {}
         raise
 
@@ -101,8 +100,7 @@ def writeFile():
         f = open(file_config_name, 'w')
         f.write(json.dumps(config_tab))
         f.close()
-    except Exception as e:
-        utils.trace("Config : Error, " + str(e))
+    except Exception:
         raise
 
 def sort():
