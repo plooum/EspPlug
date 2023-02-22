@@ -65,7 +65,7 @@ class Program:
         cmds.add(prefix+"054-s_gw", "set wifi gw", self.setWifiGw, config._wifi_gw, True)
         cmds.add(prefix+"055-s_dns", "set wifi dns", self.setWifiDns, config._wifi_dns, True)
         cmds.add(prefix+"182-s_debug", "set debug flag", self.setDebug, config._debug, True)
-        cmds.add(prefix+"185-s_meta", "use another config file", self.setConfFile, "", True)
+        cmds.add(prefix+"185-s_meta", "use another config file", self.setConfFile, config._meta_conf_key, True)
         cmds.add(prefix+"190-g_mem", "get mem used and free", self.getMem)
         cmds.add(prefix+"200-g_config", "get current config", self.getCurrentConfig, "", False, True)
         cmds.add(prefix+"210-load_config", "reload config from current file", self.loadConfig)

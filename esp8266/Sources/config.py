@@ -5,7 +5,7 @@ import collections
 config_keys = []
 
 file_config_name = "config.json"
-_meta_conf_key = "name"
+_meta_conf_key = "meta"
 
 config_tab = {}
 
