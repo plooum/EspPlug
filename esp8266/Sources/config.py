@@ -18,7 +18,6 @@ _wifi_dns = "wifi_dns"
 _pinout_num = "pinout_num"
 _name = "name"
 _cmd_separator = "cmd_separator"
-_cmd_ble_end_char = "cmd_ble_end_char"
 _debug = "debug"
 _pin_button = "pin_button"
 _pin_led = "pin_led"
@@ -33,7 +32,6 @@ config_keys.append(_wifi_dns)
 config_keys.append(_pinout_num)
 config_keys.append(_name)
 config_keys.append(_cmd_separator)
-config_keys.append(_cmd_ble_end_char)
 config_keys.append(_debug)
 config_keys.append(_pin_button)
 config_keys.append(_mode_wifi)
@@ -48,8 +46,6 @@ def loadDefaultValues():
         config_tab[_name] = "PL"
     if(not(_cmd_separator in config_tab.keys()) or str(config_tab[_cmd_separator]) == ""):
         config_tab[_cmd_separator] = "="
-    if(not(_cmd_ble_end_char in config_tab.keys()) or str(config_tab[_cmd_ble_end_char]) == ""):
-        config_tab[_cmd_ble_end_char] = ";"
     if(not(_debug in config_tab.keys()) or str(config_tab[_debug]) == ""):
         config_tab[_debug] = True
     if(not(_pin_button in config_tab.keys()) or str(config_tab[_pin_button]) == ""):
@@ -63,6 +59,15 @@ def loadDefaultValues():
             config_tab[key] = ""
     sort()
     
+def getMetaConf():
+    try:
+        meta_config_tab = {}
+        f = open("meta_config.json", 'r')
+        meta_config_tab = json.loads(f.read())
+        return meta_config_tab[_meta_conf_key]
+    except:
+        return ""
+
 def readMetaConf():
     global file_config_name
     try:
@@ -115,6 +120,8 @@ def getValue(key):
     try:
         if key in config_tab.keys():
             return config_tab[key]
+        elif key == _meta_conf_key:
+            return getMetaConf()
     except:
         pass
     return ""

@@ -1,1 +1,2 @@
-{"ble_name": "SONOFF_TEST", "cmd_ble_end_char": ";", "cmd_separator": "=", "debug": true, "mode_wifi": 0, "pin_button_toggle_on_off": 0, "pin_led": "13", "pinout_num": 12, "wifi_dns": "", "wifi_gw": "", "wifi_ip": "192.168.1.111", "wifi_mask": "", "wifi_password": "password", "wifi_ssid": "wifi"}
+{"cmd_separator": "=", "debug": true, "mode_wifi": 0, "name": "MOES_1", "pin_button": "0", "pin_led": "13", "pinout_num": 12, "wifi_dns": "", "wifi_gw": "", "wifi_ip": "", "wifi_mask": "255.255.255.0", "wifi_password": "", "wifi_ssid": ""}
+
