@@ -6,4 +6,4 @@ foreach($file in $files)
 	python3 -m mpy_cross $file
 }
 
-Get-Item -Path "./*.mpy" | Move-Item -Force -Destination "../Bin"
+Get-Item -Path "./*.mpy" | Move-Item -Force -Destination "../PreCompiled"

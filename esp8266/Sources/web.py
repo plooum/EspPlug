@@ -106,7 +106,7 @@ class WebServer:
         self.curCli.sendall(str(msg))
         
     def sendHtml(self, connectionCli): 
-        with open("template1.html", 'r') as file :
+        with open("template.html", 'r') as file :
             for line in file:
                 line = line.replace("\n", "")
                 line = line.replace("\r", "")
