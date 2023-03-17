@@ -1,0 +1,68 @@
+{
+	"plugs": {
+		"Guirlande": {
+			"ip": "192.168.1.157", 
+			"actions": {
+				"Allumer": {
+					"command": "/home/domo/http_esp_on.py",
+					"color": "blue"
+				}, 
+				"Eteindre": {
+					"command": "/home/domo/http_esp_off.py",
+					"color": "yellow"
+				}
+			},
+			"status": {
+				"command": "/home/domo/http_esp_status.py"
+			}
+		}, 
+		"Mousse": {
+			"ip": "192.168.1.151",
+			"actions": {
+				"Allumer": {
+					"command": "/home/domo/http_esp_on.py",
+					"color": "blue"
+				}, 
+				"Eteindre": {
+					"command": "/home/domo/http_esp_off.py",
+					"color": "yellow"
+				} 
+			},
+			"status": {
+				"command": "/home/domo/http_esp_status.py"
+			}
+		},
+		"Lumiere_Imprimante": {
+			"ip": "192.168.1.26",
+			"actions": {
+				"Allumer": {
+					"command": "/home/domo/tp_link_on.py",
+					"color": "blue"
+				}, 
+				"Eteindre": {
+					"command": "/home/domo/tp_link_off.py",
+					"color": "yellow"
+				} 
+			},
+			"status": {
+				"command": "/home/domo/tp_link_status.py"
+			}
+		},
+		"Imprimante": {
+			"ip": "192.168.1.25",
+			"actions": {
+				"Allumer": {
+					"command": "/home/domo/tp_link_on.py",
+					"color": "blue"
+				}, 
+				"Eteindre": {
+					"command": "/home/domo/tp_link_off.py",
+					"color": "yellow"
+				} 
+			},
+			"status": {
+				"command": "/home/domo/tp_link_status.py"
+			}
+		}
+	}
+}

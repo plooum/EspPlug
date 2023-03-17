@@ -1,0 +1,20 @@
+<div class="card bg-light mb-3" style="width:18rem; margin:10px;">
+	<div class="card-header fs-4">
+		%NAME%
+	</div>
+	<div class="card-body">
+		<p class="card-text">
+			<div>Etat :</div>
+			<div class="status">
+				<span class="status-content" id="status-%NAME%" data-device="%NAME%">
+					<span class="badge bg-secondary">...</span>
+				</span>
+				<button onclick="getStatus(%NAME%);" type="button" class="btn-refresh btn btn-default btn-sm">
+					<svg class="svg-refresh" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-refresh-cw"><polyline points="23 4 23 10 17 10"></polyline><polyline points="1 20 1 14 7 14"></polyline><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path></svg>
+				</button>
+			</div>
+			<div>Actions :</div>
+			<div class="actions">%ACTIONS%</div>
+		</p>
+	</div>
+</div>
